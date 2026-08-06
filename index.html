@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Gestión de Cortesías FTTH</title>
+  
+  <style>
+    /* ==========================================
+       TEMA: TELECOMUNICACIONES / TECNOLOGÍA
+       ========================================== */
+    :root {
+      --primary-color: #0b2545;     
+      --secondary-color: #13315c;   
+      --accent-color: #007bff;      
+      --bg-color: #eef2f7;          
+      --text-main: #333333;
+      --border-radius: 8px;
+    }
+
+    body { 
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+      background-color: var(--bg-color); 
+      margin: 0; 
+      padding: 30px 15px; 
+      color: var(--text-main);
+    }
+
+    .container { 
+      max-width: 850px; 
+      margin: auto; 
+      background: #ffffff; 
+      padding: 30px; 
+      border-radius: var(--border-radius); 
+      box-shadow: 0 10px 25px rgba(11, 37, 69, 0.1); 
+      border-top: 5px solid var(--accent-color);
+    }
+
+    .logo-container {
+      text-align: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #e1e5eb;
+    }
+
+    h2, h3, h4 { color: var(--primary-color); }
+    h2 { text-align: center; margin-top: 0; }
+    
+    .hidden { display: none !important; }
+    
+    .form-group { margin-bottom: 18px; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; color: var(--secondary-color); }
+    
+    input, select { 
+      width: 100%; 
+      padding: 10px; 
+      border: 1px solid #ced4da; 
+      border-radius: 4px; 
+      box-sizing: border-box; 
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    input:focus, select:focus { border-color: var(--accent-color); outline: none; }
+    input[disabled], select[disabled] { background-color: #f8f9fa; color: #6c757d; border-color: #e9ecef; }
+    
+    button { 
+      background-color: var(--accent-color); 
+      color: white; 
+      padding: 12px 20px; 
+      border: none; 
+      border-radius: 4px; 
+      cursor: pointer; 
+      font-size: 15px; 
+      font-weight: bold;
+      margin-top: 10px;
+      transition: background-color 0.3s, transform 0.1s;
+      width: 100%;
+    }
+    button:hover { background-color: #0056b3; }
+    button:active { transform: scale(0.98); }
+    button.btn-danger { background-color: #dc3545; }
+    button.btn-danger:hover { background-color: #b02a37; }
+    
+    .btn-sm { width: auto; padding: 8px 12px; font-size: 13px; margin-top: 0; }
+
+    .nav { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      margin-bottom: 25px; 
+      padding: 15px; 
+      background-color: #f8f9fa;
+      border-radius: var(--border-radius);
+      border: 1px solid #e1e5eb;
+    }
+    .nav div { font-size: 15px; }
+    
+    .table-container { overflow-x: auto; margin-top: 20px; border-radius: 4px; border: 1px solid #dee2e6; }
+    table { width: 100%; border-collapse: collapse; background-color: white; }
+    th, td { border-bottom: 1px solid #dee2e6; padding: 12px 15px; text-align: left; font-size: 14px; }
+    th { background-color: var(--primary-color); color: white; font-weight: 600; }
+    tr:hover { background-color: #f1f3f5; }
+    
+    .loader { 
+      text-align: center; 
+      font-weight: bold; 
+      color: var(--accent-color); 
+      margin: 15px 0; 
+      padding: 10px;
+      background-color: #e7f1ff;
+      border-radius: 4px;
+    }
+    
+    .modal-box {
+      margin-top: 25px; 
+      padding: 25px; 
+      border-radius: var(--border-radius);
+      max-height: 75vh; 
+      overflow-y: auto;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+    }
+    .modal-gerencia { border: 2px solid var(--accent-color); background-color: #f8fbff; }
+    .modal-ventas { border: 2px solid #28a745; background-color: #f6fff8; }
+    
+    .section-title { 
+      margin-top: 30px; 
+      margin-bottom: 15px; 
+      border-bottom: 2px solid #e1e5eb; 
+      padding-bottom: 5px; 
+      color: var(--secondary-color);
+    }
+
+    .doc-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      padding: 10px 15px;
+      background-color: #fff3cd;
+      color: #856404;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 4px;
+      border: 1px solid #ffeeba;
+    }
+    .doc-link:hover { background-color: #ffe8a1; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  
+  <div class="logo-container">
+    <img src="https://i.ibb.co/s4shqJN/Logo-Net-Uno.png" alt="Logo Telecomunicaciones" style="max-width: 280px; height: auto;">
+  </div>
+
+  <div id="loader" class="loader hidden">Procesando solicitud en la red... por favor espera.</div>
+
+  <!-- LOGIN MODULE -->
+  <div id="login-view">
+    <h2>Portal de Gestión de Cortesías</h2>
+    <div class="form-group">
+      <label>Usuario:</label>
+      <select id="login-user">
+        <option value="Supervisores">Supervisores</option>
+        <option value="Gerencia_General">Gerencia General</option>
+        <option value="Ventas">Ventas</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Contraseña de Acceso:</label>
+      <input type="password" id="login-pass" placeholder="Ingrese su credencial">
+    </div>
+    <button onclick="login()">Iniciar Sesión</button>
+    <p id="login-error" style="color:#dc3545; display:none; text-align:center; font-weight:bold; margin-top:15px;">Credenciales incorrectas. Acceso denegado.</p>
+  </div>
+
+  <!-- NAVBAR -->
+  <div id="navbar" class="nav hidden">
+    <div><b>Usuario Activo: </b><span id="nav-user" style="color: var(--accent-color);"></span> <br><small>Nivel de Acceso: <span id="nav-role"></span></small></div>
+    <button class="btn-danger btn-sm" onclick="logout()">Cerrar Sesión</button>
+  </div>
+
+  <!-- SUPERVISORES VIEW -->
+  <div id="supervisores-view" class="hidden">
+    <h3>Registro de Nueva Solicitud</h3>
+    <form id="form-nuevo">
+      <div class="form-group">
+        <label>Supervisor Solicitante:</label>
+        <select id="sup-solicitante" required>
+          <option value="">-- Seleccione el Supervisor --</option>
+          <option value="Gustavo Viloria">Gustavo Viloria</option>
+          <option value="Victor Gonzalez">Victor Gonzalez</option>
+          <option value="Jose Fonseca">Jose Fonseca</option>
+          <option value="Carlos Almea">Carlos Almea</option>
+          <option value="Felix Hernandez">Felix Hernandez</option>
+          <option value="Mercedes Brito">Mercedes Brito</option>
+          <option value="Aurimar Escalona">Aurimar Escalona</option>
+          <option value="Alejandro Lacruz">Alejandro Lacruz</option>
+          <option value="Corlam Castro">Corlam Castro</option>
+          <option value="Yenivy Escobar">Yenivy Escobar</option>
+          <option value="Ian Escobar">Ian Escobar</option>
+          <option value="Taimara Caridad">Taimara Caridad</option>
+          <option value="Luis Marquez">Luis Marquez</option>
+          <option value="Belkys Piña">Belkys Piña</option>
+          <option value="Leonardo Diaz">Leonardo Diaz</option>
+          <option value="Edilberto Tamayo">Edilberto Tamayo</option>
+          <option value="Luisiana Mendoza">Luisiana Mendoza</option>
+          <option value="Berbel Hernandez">Berbel Hernandez</option>
+          <option value="Mariela Canela">Mariela Canela</option>
+          <option value="Yessica Hernandez">Yessica Hernandez</option>
+          <option value="Yoscari Marquez">Yoscari Marquez</option>
+          <option value="Darwin Sevilla">Darwin Sevilla</option>
+          <option value="Ana Machuca">Ana Machuca</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Nombre o Razón Social del Cliente:</label><input type="text" id="sup-nombre" required></div>
+      
+      <!-- CAMBIO: Campo de documento con selector integrado -->
+      <div class="form-group">
+        <label>Documento de Identidad (RIF o CI):</label>
+        <div style="display: flex; gap: 10px;">
+          <select id="sup-doc-tipo" style="width: 80px; flex-shrink: 0;" required>
+            <option value="V-">V-</option>
+            <option value="E-">E-</option>
+            <option value="J-">J-</option>
+            <option value="G-">G-</option>
+          </select>
+          <input type="text" id="sup-doc-num" placeholder="Ej. 12345678" style="flex-grow: 1;" required>
+        </div>
+      </div>
+      
+      <div class="form-group"><label>Teléfono de Contacto:</label><input type="text" id="sup-tel" required></div>
+      <div class="form-group"><label>Municipio:</label><input type="text" id="sup-mun" required></div>
+      <div class="form-group"><label>Urbanización / Sector:</label><input type="text" id="sup-urb" required></div>
+      <div class="form-group"><label>Calle Principal:</label><input type="text" id="sup-calleP" required></div>
+      <div class="form-group"><label>Calle Inicial - Final:</label><input type="text" id="sup-calleIF" required></div>
+      <div class="form-group"><label>Edificio / Torre (Opcional):</label><input type="text" id="sup-edif"></div>
+      <div class="form-group"><label>Número de Casa / Apto:</label><input type="text" id="sup-casa"></div>
+      <div class="form-group"><label>Coordenadas (Enlace Google Maps):</label><input type="text" id="sup-maps"></div>
+      <div class="form-group"><label>Carta de solicitud (Formato PDF - Max 5MB):</label><input type="file" id="sup-pdf" accept="application/pdf" style="padding: 7px;" required></div>
+      <button type="button" onclick="submitNuevoIngreso()">Registrar Solicitud</button>
+    </form>
+  </div>
+
+  <!-- GERENCIA VIEW -->
+  <div id="gerencia-view" class="hidden">
+    <h3>Bandeja de Aprobaciones (Nuevas Solicitudes)</h3>
+    <button class="btn-sm" onclick="loadGerenciaTable()" style="background-color: var(--secondary-color);">↻ Sincronizar Base de Datos</button>
+    <div class="table-container" id="gerencia-table-div"></div>
+    
+    <!-- Modal Gerencia -->
+    <div id="gerencia-modal" class="modal-box modal-gerencia hidden">
+      <h4>Evaluación de Solicitud: <span id="ger-id-span" style="color: var(--accent-color);"></span></h4>
+      <a id="ger-pdf-link" class="doc-link" href="#" target="_blank">📄 Visualizar Documento Adjunto (PDF)</a>
+      
+      <div class="form-group"><label>Supervisor Solicitante:</label><input type="text" id="ger-supSol" disabled></div>
+      <div class="form-group"><label>Cliente:</label><input type="text" id="ger-nombre" disabled></div>
+      <div class="form-group"><label>Documento (RIF/CI):</label><input type="text" id="ger-doc" disabled></div>
+      
+      <h4 class="section-title">Parámetros Técnicos y Comerciales</h4>
+      <div class="form-group">
+        <label>Velocidad:</label>
+        <select id="ger-vel">
+          <option value="6mb">6 Mbps</option>
+          <option value="100mb">100 Mbps</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tipo de ONT:</label>
+        <select id="ger-ont">
+          <option value="C/W">Con Wi-Fi (C/W)</option>
+          <option value="S/W">Sin Wi-Fi (S/W)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tiempo de Cortesía:</label>
+        <select id="ger-tiempo">
+          <option value="3 meses">3 meses</option>
+          <option value="6 meses">6 meses</option>
+          <option value="1 año">1 año</option>
+        </select>
+      </div>
+      <button type="button" onclick="submitGerencia()">Autorizar y Derivar a Ventas</button>
+      <button type="button" class="btn-danger" onclick="document.getElementById('gerencia-modal').classList.add('hidden')">Cancelar Operación</button>
+    </div>
+  </div>
+
+  <!-- VENTAS VIEW -->
+  <div id="ventas-view" class="hidden">
+    <h3>Gestión de Instalaciones en Progreso</h3>
+    <button class="btn-sm" onclick="loadVentasTable()" style="background-color: var(--secondary-color);">↻ Sincronizar Base de Datos</button>
+    <div class="table-container" id="ventas-table-div"></div>
+    
+    <!-- Modal Ventas -->
+    <div id="ventas-modal" class="modal-box modal-ventas hidden">
+      <h4>Carga de contrato: <span id="ven-id-span" style="color: #28a745;"></span></h4>
+      <a id="ven-pdf-link" class="doc-link" href="#" target="_blank">📄 Visualizar Documento Adjunto (PDF)</a>
+      
+      <h4 class="section-title">Ficha Técnica del Cliente</h4>
+      <div class="form-group"><label>Supervisor Solicitante:</label><input type="text" id="ven-supSol" disabled></div>
+      <div class="form-group"><label>Titular del Servicio:</label><input type="text" id="ven-nombre" disabled></div>
+      <div class="form-group"><label>Documento:</label><input type="text" id="ven-doc" disabled></div>
+      <div class="form-group"><label>Teléfono:</label><input type="text" id="ven-tel" disabled></div>
+      <div class="form-group"><label>Municipio:</label><input type="text" id="ven-mun" disabled></div>
+      <div class="form-group"><label>Sector / Urbanización:</label><input type="text" id="ven-urb" disabled></div>
+      <div class="form-group"><label>Calle Principal:</label><input type="text" id="ven-calleP" disabled></div>
+      <div class="form-group"><label>Intersección:</label><input type="text" id="ven-calleIF" disabled></div>
+      <div class="form-group"><label>Edificio:</label><input type="text" id="ven-edif" disabled></div>
+      <div class="form-group"><label>Casa / Apto:</label><input type="text" id="ven-casa" disabled></div>
+      <div class="form-group"><label>Coordenadas Maps:</label><input type="text" id="ven-maps" disabled></div>
+      
+      <h4 class="section-title">Resolución de Gerencia General</h4>
+      <div class="form-group"><label>Velocidad Asignada:</label><input type="text" id="ven-vel" disabled></div>
+      <div class="form-group"><label>Tipo de ONT:</label><input type="text" id="ven-ont" disabled></div>
+      <div class="form-group"><label>Tiempo de Cortesía:</label><input type="text" id="ven-tiempo" disabled></div>
+      
+      <h4 class="section-title">Cierre de Orden</h4>
+      <div class="form-group">
+        <label>Identificador de Ticket:</label>
+        <input type="text" id="ven-ticket" placeholder="Ej. #90210..." required style="border-color: #28a745; border-width: 2px; font-weight: bold;">
+      </div>
+      
+      <button type="button" style="background-color: #28a745;" onclick="submitVentas()">Finalizar Orden</button>
+      <button type="button" class="btn-danger" onclick="document.getElementById('ventas-modal').classList.add('hidden')">Cancelar Operación</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // =========================================================================
+  // ⚠️ PEGA AQUÍ LA URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
+  // =========================================================================
+  const API_URL = "https://script.google.com/macros/s/AKfycbyYlfOqp79HQXXR0p42Mv00ioyNWpA_eNztRbyOPn7BZ6E-_Z9dabR13JnjfK46Wx0W/exec";
+
+  const users = [
+    { user: "Supervisores", pass: "supervisoresaragua", role: "CREADOR" },
+    { user: "Gerencia_General", pass: "gerenciageneral", role: "APROBADOR" },
+    { user: "Ventas", pass: "ventasaragua", role: "FINALIZADOR" }
+  ];
+
+  let currentUser = null;
+  let activeId = null; 
+  let rawData = []; 
+
+  async function apiCall(actionName, payloadData = {}) {
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: actionName, payload: payloadData })
+      });
+      return await response.json();
+    } catch (error) {
+      throw new Error("Fallo en la comunicación con el servidor central: " + error.message);
+    }
+  }
+
+  function login() {
+    const u = document.getElementById('login-user').value;
+    const p = document.getElementById('login-pass').value;
+    const errorMsg = document.getElementById('login-error');
+    
+    const foundUser = users.find(x => x.user === u && x.pass === p);
+    
+    if(foundUser) {
+      errorMsg.style.display = 'none';
+      currentUser = foundUser;
+      
+      document.getElementById('login-view').classList.add('hidden');
+      document.getElementById('navbar').classList.remove('hidden');
+      document.getElementById('nav-user').innerText = currentUser.user.replace("_", " ");
+      document.getElementById('nav-role').innerText = currentUser.role;
+
+      if(currentUser.role === 'CREADOR') document.getElementById('supervisores-view').classList.remove('hidden');
+      if(currentUser.role === 'APROBADOR') {
+        document.getElementById('gerencia-view').classList.remove('hidden');
+        loadGerenciaTable();
+      }
+      if(currentUser.role === 'FINALIZADOR') {
+        document.getElementById('ventas-view').classList.remove('hidden');
+        loadVentasTable();
+      }
+    } else {
+      errorMsg.style.display = 'block';
+    }
+  }
+
+  function logout() {
+    currentUser = null;
+    activeId = null;
+    document.getElementById('login-pass').value = '';
+    
+    document.getElementById('navbar').classList.add('hidden');
+    document.getElementById('supervisores-view').classList.add('hidden');
+    document.getElementById('gerencia-view').classList.add('hidden');
+    document.getElementById('ventas-view').classList.add('hidden');
+    document.getElementById('gerencia-modal').classList.add('hidden');
+    document.getElementById('ventas-modal').classList.add('hidden');
+    
+    document.getElementById('login-view').classList.remove('hidden');
+  }
+
+  function showLoader() { document.getElementById('loader').classList.remove('hidden'); }
+  function hideLoader() { document.getElementById('loader').classList.add('hidden'); }
+  function handleError(err) {
+    hideLoader();
+    alert("Error de conexión: " + err.message);
+  }
+
+  // --- LOGICA SUPERVISORES (NUEVO INGRESO) ---
+  function submitNuevoIngreso() {
+    const supSolicitante = document.getElementById('sup-solicitante').value;
+    if(!supSolicitante) {
+      alert("Operación denegada: Seleccione el Supervisor responsable.");
+      return;
+    }
+
+    const fileInput = document.getElementById('sup-pdf');
+    if(fileInput.files.length === 0) {
+      alert("Operación denegada: Documento PDF obligatorio.");
+      return;
+    }
+    
+    // CAMBIO: Lógica para concatenar el Prefijo y el Número de Documento
+    const docTipo = document.getElementById('sup-doc-tipo').value;
+    const docNum = document.getElementById('sup-doc-num').value.trim();
+    if(!docNum) {
+      alert("Operación denegada: Ingrese el número de documento de identidad.");
+      return;
+    }
+    const documentoCompleto = docTipo + docNum;
+    
+    showLoader();
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = async function(e) {
+      const data = {
+        supervisorSol: supSolicitante,
+        nombre: document.getElementById('sup-nombre').value,
+        documento: documentoCompleto, // Aquí mandamos el texto ya unido (Ej: "V-12345678")
+        telefono: document.getElementById('sup-tel').value,
+        municipio: document.getElementById('sup-mun').value,
+        urbanizacion: document.getElementById('sup-urb').value,
+        callePrincipal: document.getElementById('sup-calleP').value,
+        calleInicialFinal: document.getElementById('sup-calleIF').value,
+        edificio: document.getElementById('sup-edif').value,
+        casaApto: document.getElementById('sup-casa').value,
+        maps: document.getElementById('sup-maps').value,
+        fileName: file.name,
+        fileBase64: e.target.result.split(',')[1] 
+      };
+
+      try {
+        const res = await apiCall("saveNewRequest", data);
+        hideLoader();
+        if(res.success) {
+          alert(res.message);
+          document.getElementById('form-nuevo').reset();
+        } else {
+          alert("Excepción del sistema: " + res.message);
+        }
+      } catch (err) {
+        handleError(err);
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // --- LOGICA GERENCIA ---
+  async function loadGerenciaTable() {
+    showLoader();
+    try {
+      const res = await apiCall("getRequests", { sheetName: "NUEVO INGRESO" });
+      hideLoader();
+      rawData = res; 
+      let html = '<table><tr><th>Registro</th><th>Supervisor Solicitante</th><th>Titular / Razón Social</th><th>Gestión</th></tr>';
+      res.forEach(row => {
+        html += `<tr>
+                  <td>${row.fechaHora}</td><td>${row.supervisorSol}</td><td>${row.nombre}</td>
+                  <td><button class="btn-sm" onclick="openGerenciaModal('${row.id}')">Evaluar Perfil</button></td>
+                 </tr>`;
+      });
+      html += '</table>';
+      document.getElementById('gerencia-table-div').innerHTML = html;
+    } catch (err) {
+      handleError(err);
+    }
+  }
+
+  function openGerenciaModal(id) {
+    activeId = id;
+    const req = rawData.find(x => x.id === id);
+    if(!req) return;
+    
+    document.getElementById('ger-id-span').innerText = id;
+    document.getElementById('ger-supSol').value = req.supervisorSol;
+    document.getElementById('ger-nombre').value = req.nombre;
+    document.getElementById('ger-doc').value = req.documento;
+    document.getElementById('ger-pdf-link').href = req.pdf;
+    
+    document.getElementById('gerencia-modal').classList.remove('hidden');
+  }
+
+  async function submitGerencia() {
+    showLoader();
+    const newData = {
+      velocidad: document.getElementById('ger-vel').value,
+      tipoONT: document.getElementById('ger-ont').value,
+      tiempo: document.getElementById('ger-tiempo').value
+    };
+    
+    try {
+      const res = await apiCall("approveRequest", { id: activeId, newData: newData });
+      hideLoader();
+      if(res.success) {
+        alert(res.message);
+        document.getElementById('gerencia-modal').classList.add('hidden');
+        loadGerenciaTable(); 
+      } else {
+        alert("Falla de ejecución: " + res.message);
+      }
+    } catch (err) {
+      handleError(err);
+    }
+  }
+
+  // --- LOGICA VENTAS ---
+  async function loadVentasTable() {
+    showLoader();
+    try {
+      const res = await apiCall("getRequests", { sheetName: "SOLICITUDES EN PROGRESO" });
+      hideLoader();
+      rawData = res;
+      let html = '<table><tr><th>Asignación</th><th>Supervisor</th><th>Titular / Razón Social</th><th>Ancho de Banda</th><th>Gestión</th></tr>';
+      res.forEach(row => {
+        html += `<tr>
+                  <td>${row.fechaHora}</td><td>${row.supervisorSol}</td><td>${row.nombre}</td><td>${row.velocidad}</td>
+                  <td><button class="btn-sm" style="background-color:#28a745;" onclick="openVentasModal('${row.id}')">Generar Orden</button></td>
+                 </tr>`;
+      });
+      html += '</table>';
+      document.getElementById('ventas-table-div').innerHTML = html;
+    } catch (err) {
+      handleError(err);
+    }
+  }
+
+  function openVentasModal(id) {
+    activeId = id;
+    const req = rawData.find(x => x.id === id);
+    if(!req) return;
+    
+    document.getElementById('ven-id-span').innerText = id;
+    
+    document.getElementById('ven-supSol').value = req.supervisorSol;
+    document.getElementById('ven-nombre').value = req.nombre;
+    document.getElementById('ven-doc').value = req.documento;
+    document.getElementById('ven-tel').value = req.telefono;
+    document.getElementById('ven-mun').value = req.municipio;
+    document.getElementById('ven-urb').value = req.urbanizacion;
+    document.getElementById('ven-calleP').value = req.callePrincipal;
+    document.getElementById('ven-calleIF').value = req.calleInicialFinal;
+    document.getElementById('ven-edif').value = req.edificio;
+    document.getElementById('ven-casa').value = req.casaApto;
+    document.getElementById('ven-maps').value = req.maps;
+    
+    document.getElementById('ven-vel').value = req.velocidad;
+    document.getElementById('ven-ont').value = req.tipoONT;
+    document.getElementById('ven-tiempo').value = req.tiempo;
+    document.getElementById('ven-pdf-link').href = req.pdf;
+    
+    document.getElementById('ven-ticket').value = '';
+    
+    document.getElementById('ventas-modal').classList.remove('hidden');
+  }
+
+  async function submitVentas() {
+    const ticketValue = document.getElementById('ven-ticket').value.trim();
+    
+    if(!ticketValue) {
+      alert("Atención: El número de Ticket es obligatorio para el registro en base de datos.");
+      return;
+    }
+
+    showLoader();
+    try {
+      const res = await apiCall("finalizeRequest", { id: activeId, newData: { ticket: ticketValue } });
+      hideLoader();
+      if(res.success) {
+        alert("Orden Técnica procesada con éxito. Cliente CONECTADO. " + res.message);
+        document.getElementById('ventas-modal').classList.add('hidden');
+        loadVentasTable(); 
+      } else {
+        alert("Falla de ejecución: " + res.message);
+      }
+    } catch (err) {
+      handleError(err);
+    }
+  }
+</script>
+</body>
+</html>
