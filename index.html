@@ -214,16 +214,12 @@
       </div>
       <div class="form-group"><label>Nombre o Razón Social del Cliente:</label><input type="text" id="sup-nombre" required></div>
       
-      <!-- CAMBIO: Campo de documento con selector integrado -->
       <div class="form-group">
         <label>Documento de Identidad (RIF o CI):</label>
         <div style="display: flex; gap: 10px;">
           <select id="sup-doc-tipo" style="width: 80px; flex-shrink: 0;" required>
             <option value="V-">V-</option>
-            <option value="E-">E-</option>
             <option value="J-">J-</option>
-            <option value="G-">G-</option>
-            <option value="G-">C-</option>
           </select>
           <input type="text" id="sup-doc-num" placeholder="Ej. 12345678" style="flex-grow: 1;" required>
         </div>
@@ -258,6 +254,16 @@
       <div class="form-group"><label>Documento (RIF/CI):</label><input type="text" id="ger-doc" disabled></div>
       
       <h4 class="section-title">Parámetros Técnicos y Comerciales</h4>
+      
+      <!-- CAMBIO: Nuevo Campo Motivo de Cortesía -->
+      <div class="form-group">
+        <label>Motivo de Cortesía:</label>
+        <select id="ger-motivo">
+          <option value="Intercambio">Intercambio</option>
+          <option value="RSE">RSE (Responsabilidad Social Empresarial)</option>
+        </select>
+      </div>
+
       <div class="form-group">
         <label>Velocidad:</label>
         <select id="ger-vel">
@@ -310,6 +316,7 @@
       <div class="form-group"><label>Coordenadas Maps:</label><input type="text" id="ven-maps" disabled></div>
       
       <h4 class="section-title">Resolución de Gerencia General</h4>
+      <div class="form-group"><label>Motivo de Cortesía:</label><input type="text" id="ven-motivo" disabled></div> <!-- Agregado para visibilidad de ventas -->
       <div class="form-group"><label>Velocidad Asignada:</label><input type="text" id="ven-vel" disabled></div>
       <div class="form-group"><label>Tipo de ONT:</label><input type="text" id="ven-ont" disabled></div>
       <div class="form-group"><label>Tiempo de Cortesía:</label><input type="text" id="ven-tiempo" disabled></div>
@@ -331,7 +338,7 @@
   // =========================================================================
   // ⚠️ PEGA AQUÍ LA URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
   // =========================================================================
-  const API_URL = "https://script.google.com/macros/s/AKfycbyYlfOqp79HQXXR0p42Mv00ioyNWpA_eNztRbyOPn7BZ6E-_Z9dabR13JnjfK46Wx0W/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbwt9xT-tipV7iG7waiTKe3ryBQ4jxxck74ULXXvyUIjy075x0LAgpfE8MJSYNrHE7XJ/exec";
 
   const users = [
     { user: "Supervisores", pass: "supervisoresaragua", role: "CREADOR" },
@@ -421,7 +428,6 @@
       return;
     }
     
-    // CAMBIO: Lógica para concatenar el Prefijo y el Número de Documento
     const docTipo = document.getElementById('sup-doc-tipo').value;
     const docNum = document.getElementById('sup-doc-num').value.trim();
     if(!docNum) {
@@ -438,7 +444,7 @@
       const data = {
         supervisorSol: supSolicitante,
         nombre: document.getElementById('sup-nombre').value,
-        documento: documentoCompleto, // Aquí mandamos el texto ya unido (Ej: "V-12345678")
+        documento: documentoCompleto, 
         telefono: document.getElementById('sup-tel').value,
         municipio: document.getElementById('sup-mun').value,
         urbanizacion: document.getElementById('sup-urb').value,
@@ -499,12 +505,16 @@
     document.getElementById('ger-doc').value = req.documento;
     document.getElementById('ger-pdf-link').href = req.pdf;
     
+    // Resetear el select de motivo por defecto en la vista
+    document.getElementById('ger-motivo').value = "Intercambio";
+    
     document.getElementById('gerencia-modal').classList.remove('hidden');
   }
 
   async function submitGerencia() {
     showLoader();
     const newData = {
+      motivo: document.getElementById('ger-motivo').value,  // Se incluye el nuevo dato
       velocidad: document.getElementById('ger-vel').value,
       tipoONT: document.getElementById('ger-ont').value,
       tiempo: document.getElementById('ger-tiempo').value
@@ -532,10 +542,10 @@
       const res = await apiCall("getRequests", { sheetName: "SOLICITUDES EN PROGRESO" });
       hideLoader();
       rawData = res;
-      let html = '<table><tr><th>Asignación</th><th>Supervisor</th><th>Titular / Razón Social</th><th>Ancho de Banda</th><th>Gestión</th></tr>';
+      let html = '<table><tr><th>Asignación</th><th>Supervisor</th><th>Titular / Razón Social</th><th>Motivo</th><th>Gestión</th></tr>';
       res.forEach(row => {
         html += `<tr>
-                  <td>${row.fechaHora}</td><td>${row.supervisorSol}</td><td>${row.nombre}</td><td>${row.velocidad}</td>
+                  <td>${row.fechaHora}</td><td>${row.supervisorSol}</td><td>${row.nombre}</td><td>${row.motivo}</td>
                   <td><button class="btn-sm" style="background-color:#28a745;" onclick="openVentasModal('${row.id}')">Generar Orden</button></td>
                  </tr>`;
       });
@@ -565,6 +575,8 @@
     document.getElementById('ven-casa').value = req.casaApto;
     document.getElementById('ven-maps').value = req.maps;
     
+    // Se inserta la información de resolución
+    document.getElementById('ven-motivo').value = req.motivo || "No especificado";
     document.getElementById('ven-vel').value = req.velocidad;
     document.getElementById('ven-ont').value = req.tipoONT;
     document.getElementById('ven-tiempo').value = req.tiempo;
