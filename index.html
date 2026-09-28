@@ -226,6 +226,7 @@
       </div>
       
       <div class="form-group"><label>Teléfono de Contacto:</label><input type="text" id="sup-tel" required></div>
+      <div class="form-group"><label>Correo Electrónico:</label><input type="email" id="sup-correo" placeholder="ejemplo@correo.com" required></div>
       <div class="form-group"><label>Municipio:</label><input type="text" id="sup-mun" required></div>
       <div class="form-group"><label>Urbanización / Sector:</label><input type="text" id="sup-urb" required></div>
       <div class="form-group"><label>Calle Principal:</label><input type="text" id="sup-calleP" required></div>
@@ -252,6 +253,7 @@
       <div class="form-group"><label>Supervisor Solicitante:</label><input type="text" id="ger-supSol" disabled></div>
       <div class="form-group"><label>Cliente:</label><input type="text" id="ger-nombre" disabled></div>
       <div class="form-group"><label>Documento (RIF/CI):</label><input type="text" id="ger-doc" disabled></div>
+      <div class="form-group"><label>Correo Electrónico:</label><input type="text" id="ger-correo" disabled></div>
       
       <h4 class="section-title">Parámetros Técnicos y Comerciales</h4>
       
@@ -307,6 +309,7 @@
       <div class="form-group"><label>Titular del Servicio:</label><input type="text" id="ven-nombre" disabled></div>
       <div class="form-group"><label>Documento:</label><input type="text" id="ven-doc" disabled></div>
       <div class="form-group"><label>Teléfono:</label><input type="text" id="ven-tel" disabled></div>
+      <div class="form-group"><label>Correo Electrónico:</label><input type="text" id="ven-correo" disabled></div>
       <div class="form-group"><label>Municipio:</label><input type="text" id="ven-mun" disabled></div>
       <div class="form-group"><label>Sector / Urbanización:</label><input type="text" id="ven-urb" disabled></div>
       <div class="form-group"><label>Calle Principal:</label><input type="text" id="ven-calleP" disabled></div>
@@ -446,6 +449,7 @@
         nombre: document.getElementById('sup-nombre').value,
         documento: documentoCompleto, 
         telefono: document.getElementById('sup-tel').value,
+        correo: document.getElementById('sup-correo').value.trim(),
         municipio: document.getElementById('sup-mun').value,
         urbanizacion: document.getElementById('sup-urb').value,
         callePrincipal: document.getElementById('sup-calleP').value,
@@ -503,6 +507,7 @@
     document.getElementById('ger-supSol').value = req.supervisorSol;
     document.getElementById('ger-nombre').value = req.nombre;
     document.getElementById('ger-doc').value = req.documento;
+    document.getElementById('ger-correo').value = req.correo || "";
     document.getElementById('ger-pdf-link').href = req.pdf;
     
     // Resetear el select de motivo por defecto en la vista
@@ -567,6 +572,7 @@
     document.getElementById('ven-nombre').value = req.nombre;
     document.getElementById('ven-doc').value = req.documento;
     document.getElementById('ven-tel').value = req.telefono;
+    document.getElementById('ven-correo').value = req.correo || "";
     document.getElementById('ven-mun').value = req.municipio;
     document.getElementById('ven-urb').value = req.urbanizacion;
     document.getElementById('ven-calleP').value = req.callePrincipal;
